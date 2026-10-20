@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>HunianKu</AssemblyName>
+    <RootNamespace>HunianKu</RootNamespace>
+    <ApplicationIcon>Assets\hunianku.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <Product>HunianKu - Sistem Manajemen Apartemen</Product>
+  </PropertyGroup>
+
+  <!-- Pengaturan publish .exe ada di Properties/PublishProfiles/SingleFileExe.pubxml -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\hunianku.ico" />
+    <Resource Include="Assets\hunianku.png" />
+  </ItemGroup>
+
+  <!-- appsettings.json TIDAK dimasukkan ke dalam .exe, tetapi disalin di
+       sebelahnya supaya connection string bisa diedit dengan Notepad. -->
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
+  </ItemGroup>
+
+</Project>

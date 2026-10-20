@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+
+# Belum dimasukkan ke repo
+docs/
+publish/
+release/
