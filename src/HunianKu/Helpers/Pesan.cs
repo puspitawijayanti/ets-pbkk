@@ -3,10 +3,6 @@ using Microsoft.Data.SqlClient;
 
 namespace HunianKu.Helpers;
 
-/// <summary>
-/// Menampilkan pesan ke user dengan bahasa yang ramah,
-/// termasuk menerjemahkan error teknis SQL Server.
-/// </summary>
 public static class Pesan
 {
     public static void Info(string pesan)
@@ -17,8 +13,7 @@ public static class Pesan
 
     public static bool Konfirmasi(string pesan)
         => MessageBox.Show(pesan, "Konfirmasi", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
-
-    /// <summary>Tampilkan error. ValidasiException = peringatan biasa, lainnya = error.</summary>
+    
     public static void Error(Exception ex)
     {
         if (ex is ValidasiException)
@@ -29,13 +24,11 @@ public static class Pesan
         MessageBox.Show(Terjemahkan(ex), "Terjadi Kesalahan", MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
-    /// <summary>Mengubah exception teknis menjadi kalimat yang bisa dipahami user.</summary>
     public static string Terjemahkan(Exception ex)
     {
         if (ex is not SqlException sql)
             return "Terjadi kesalahan: " + ex.Message;
 
-        // Error buatan sendiri dari stored procedure (THROW 50001 dst.)
         if (sql.Number >= 50000)
             return sql.Message;
 
