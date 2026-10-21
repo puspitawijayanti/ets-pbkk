@@ -1,0 +1,82 @@
+<UserControl x:Class="HunianKu.Views.Pages.PenghuniPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                    <TextBlock Text="Daftar Penghuni" Style="{StaticResource SectionTitle}" Margin="0" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBox x:Name="TxtCari" Width="220" KeyDown="TxtCari_KeyDown"
+                                 ToolTip="Cari nama, NIK, atau username lalu tekan Enter"/>
+                        <Button Content="Cari" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="Cari_Click"/>
+                    </StackPanel>
+                </DockPanel>
+                <DataGrid x:Name="DgPenghuni" SelectionChanged="DgPenghuni_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nama" Binding="{Binding NamaLengkap}" Width="*" MinWidth="140"/>
+                        <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="100"/>
+                        <DataGridTextColumn Header="NIK" Binding="{Binding NIK}" Width="150"/>
+                        <DataGridTextColumn Header="No. HP" Binding="{Binding NoHp}" Width="120"/>
+                        <DataGridTextColumn Header="Unit Aktif" Binding="{Binding UnitAktif, TargetNullValue='-'}" Width="85"/>
+                        <DataGridCheckBoxColumn Header="Akun Aktif" Binding="{Binding IsAktif}" Width="85"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock x:Name="TxtJudulForm" Text="Tambah Penghuni" Style="{StaticResource SectionTitle}"/>
+
+                    <TextBlock Text="Nama Lengkap" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtNama" MaxLength="100"/>
+
+                    <TextBlock Text="Username (untuk login)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtUsername" MaxLength="50" CharacterCasing="Lower"/>
+
+                    <TextBlock x:Name="LblPassword" Text="Password Awal (min. 6 karakter)" Style="{StaticResource FieldLabel}"/>
+                    <PasswordBox x:Name="TxtPassword"/>
+
+                    <TextBlock Text="NIK (16 digit)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtNik" MaxLength="16"/>
+
+                    <TextBlock Text="Jenis Kelamin" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="CmbJK" SelectedValuePath="Tag">
+                        <ComboBoxItem Content="Laki-laki" Tag="L"/>
+                        <ComboBoxItem Content="Perempuan" Tag="P"/>
+                    </ComboBox>
+
+                    <TextBlock Text="No. HP" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtNoHp" MaxLength="20"/>
+
+                    <TextBlock Text="Email (opsional)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtEmail" MaxLength="100"/>
+
+                    <TextBlock Text="Pekerjaan (opsional)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtPekerjaan" MaxLength="100"/>
+
+                    <TextBlock Text="Kontak Darurat (opsional)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtDarurat" MaxLength="150"/>
+
+                    <CheckBox x:Name="ChkAktif" Content="Akun aktif (boleh login)" IsChecked="True"/>
+
+                    <WrapPanel Margin="0,20,0,0">
+                        <Button Content="Simpan" Click="Simpan_Click" Margin="0,0,8,8"/>
+                        <Button Content="Baru" Style="{StaticResource SecondaryButton}" Click="Baru_Click" Margin="0,0,8,8"/>
+                        <Button x:Name="BtnReset" Content="Reset Password" Style="{StaticResource SecondaryButton}"
+                                Click="ResetPassword_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                        <Button x:Name="BtnHapus" Content="Hapus" Style="{StaticResource DangerButton}"
+                                Click="Hapus_Click" IsEnabled="False" Margin="0,0,8,8"/>
+                    </WrapPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
