@@ -97,3 +97,6 @@ https://github.com/puspitawijayanti/ets-pbkk/blob/main/release/HunianKu-v1.0.zip
 ### Link Video Demo Project
 https://youtu.be/gIVeoPRkozk
 
+### Link PRD
+https://github.com/puspitawijayanti/ets-pbkk/blob/main/docs/PRD-5025241059_5025241064_5025241149.pdf
+
