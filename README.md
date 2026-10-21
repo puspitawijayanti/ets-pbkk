@@ -1,103 +1,87 @@
-# HunianKu
+# HunianKu — Sistem Manajemen Hunian Apartemen
 
-Apartment management desktop application built with C# WPF (.NET 10) and SQL Server. It covers towers and units, residents, lease contracts, monthly billing (rent, electricity, water, service charge), late fees, payments, maintenance requests, facility booking, and reports.
+HunianKu merupakan aplikasi desktop untuk membantu pengelolaan operasional apartemen, mulai dari pendataan unit dan penghuni, kontrak sewa, tagihan bulanan, pembayaran, komplain, hingga pemesanan fasilitas. Aplikasi ini dikembangkan menggunakan C# WPF (.NET 10) dengan basis data SQL Server sebagai proyek ETS mata kuliah Pemrograman Berbasis Kerangka Kerja (PBKK).
 
-ETS project for the PBKK course.
+## Anggota Kelompok
 
-| Member | Student ID | Responsibility |
+| Nama | NRP | Tanggung Jawab |
 |---|---|---|
-| Puspita Wijayanti Kusuma | 5025241059 | Database, master data, complaints and booking, reports and dashboard |
-| Nashwa Aulia Putri Diansyah | 5025241064 | Authentication, residents, lease contracts, role-based menu |
-| Kineisha Rana Salsabila | 5025241149 | Project setup and theme, meter readings and billing, payments, publishing |
+| Puspita Wijayanti Kusuma | 5025241059 | Database, data master, komplain, booking, dashboard, dan laporan |
+| Nashwa Aulia Putri Diansyah | 5025241064 | Autentikasi, data penghuni, kontrak sewa, dan hak akses |
+| Kineisha Rana Salsabila | 5025241149 | Setup project, tema, meteran, tagihan, pembayaran, dan publish |
 
-## Project Structure
+## Fitur Utama
 
-```
+- **Manajemen Data:** Pengelolaan tower, unit, tipe unit, tarif, penghuni, dan kontrak sewa.
+- **Tagihan dan Pembayaran:** Pencatatan meteran listrik dan air, pembuatan tagihan, denda keterlambatan, serta verifikasi pembayaran.
+- **Komplain dan Booking:** Pengajuan komplain, pengelolaan perbaikan, dan pemesanan fasilitas apartemen.
+- **Dashboard dan Laporan:** Menampilkan informasi operasional apartemen.
+
+## Struktur Project
+
+```text
 ETS/
-├── HunianKu.sln                 
-├── database/
-│   └── HunianKu.sql             
-├── src/HunianKu/               
-│   ├── App.xaml(.cs)            
-│   ├── appsettings.json         
-│   ├── Models/                  
-│   ├── Data/                    
-│   ├── Services/               
-│   ├── Helpers/                 
-│   ├── Views/                   
-│   ├── Styles/Theme.xaml       
-│   └── Properties/PublishProfiles/SingleFileExe.pubxml
-├── publish/HunianKu/            
-├── release/HunianKu-v1.0.zip    
+├── HunianKu.sln
+├── database/HunianKu.sql
+├── src/HunianKu/
+│   ├── Models/
+│   ├── Data/
+│   ├── Services/
+│   ├── Helpers/
+│   ├── Views/
+│   ├── Styles/
+│   └── appsettings.json
+├── publish/HunianKu/
+├── release/HunianKu-v1.0.zip
 └── docs/
-    ├── PRD.md                                          
-    ├── diagram/                 
-    └── screenshots/             
+    ├── PRD.md
+    ├── diagram/
+    └── screenshots/
 ```
 
-## Requirements
+## Persyaratan
 
-To run the release build:
 - Windows 10/11 (64-bit)
-- SQL Server (Express, Developer, or LocalDB)
+- SQL Server (Express, Developer, atau LocalDB)
+- Visual Studio 2026 dan .NET SDK 10 untuk pengembangan
 
-The executable is self-contained, so the .NET runtime does not need to be installed.
+## Cara Menjalankan
 
-For development:
-- Visual Studio 2026 with the .NET desktop development workload
-- .NET SDK 10
-- SQL Server and SQL Server Management Studio (SSMS)
+1. Buka `database/HunianKu.sql` melalui SQL Server Management Studio (SSMS), lalu jalankan skrip.
+2. Sesuaikan koneksi database pada `appsettings.json`.
+3. Buka `HunianKu.sln` di Visual Studio dan tekan **F5**.
 
-## Database Setup
+Alternatif menggunakan terminal:
 
-Run `database/HunianKu.sql` once, either by opening it in SSMS and executing it, or from the command line:
-
-```bat
-sqlcmd -S .\SQLEXPRESS -E -C -i database\HunianKu.sql
+```bash
+dotnet run --project src/HunianKu
 ```
 
-Replace `.\SQLEXPRESS` with your server name. The script drops and recreates the `HunianKu` database, including sample data, so it can also be used to reset the data.
+**Catatan:** Skrip SQL menghapus dan membuat ulang database `HunianKu`, termasuk data demo. Pastikan tidak ada data penting sebelum menjalankannya.
 
-## Configuration
-
-The connection string is stored in `appsettings.json` (next to `HunianKu.exe`, or in `src/HunianKu/` during development):
-
-```json
-{
-  "ConnectionStrings": {
-    "HunianKu": "Server=.\SQLEXPRESS;Database=HunianKu;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
-
-Adjust the `Server` value to match your SQL Server instance:
-
-| SQL Server instance | `Server` value |
-|---|---|
-| Express | `.\SQLEXPRESS` |
-| Developer / Standard | `localhost` |
-| LocalDB | `(localdb)\MSSQLLocalDB` |
-
-To use SQL authentication, replace `Trusted_Connection=True` with `User Id=...;Password=...`.
-
-## Running the Application
-
-- Visual Studio: open `HunianKu.sln` and press F5.
-- Command line: `dotnet run --project src/HunianKu`
-- Release build: extract `release/HunianKu-v1.0.zip`, set up the database, adjust `appsettings.json`, then run `HunianKu.exe`.
-
-### Sample Accounts
+## Akun Demo
 
 | Role | Username | Password |
 |---|---|---|
 | Admin | `admin` | `admin123` |
-| Staff | `rina`, `dodi` | `staf123` |
-| Resident | `budi`, `agus`, `siti`, `sarah` | `penghuni123` |
+| Staf | `rina`, `dodi` | `staf123` |
+| Penghuni | `budi`, `agus`, `siti`, `sarah` | `penghuni123` |
 
-## Building the Executable
+## Skenario Demo
 
-```bat
+1. Melihat dashboard dan laporan sebagai admin.
+2. Membuat kontrak sewa penghuni baru.
+3. Mencatat meteran dan membuat tagihan.
+4. Mengajukan serta memverifikasi pembayaran.
+5. Mencoba booking fasilitas dengan jadwal bentrok dan tersedia.
+6. Mengajukan komplain dan memperbarui status penanganannya.
+
+## Build Aplikasi
+
+Untuk membuat executable:
+
+```bash
 dotnet publish src/HunianKu/HunianKu.csproj -p:PublishProfile=SingleFileExe
 ```
 
-The output is written to `publish/HunianKu/` and contains `HunianKu.exe` and `appsettings.json`.
+Hasil build tersedia di `publish/HunianKu/`.
