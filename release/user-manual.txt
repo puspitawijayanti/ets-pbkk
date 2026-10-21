@@ -1,0 +1,20 @@
+What's in the package:
+  HunianKu.exe      
+  appsettings.json  
+  HunianKu.sql      
+
+How to run it:
+  1. Make sure SQL Server is installed. SQL Server Express is free and works fine.
+  2. Open HunianKu.sql in SQL Server Management Studio and press Execute.
+     Or from Command Prompt:
+        sqlcmd -S .\SQLEXPRESS -E -C -i HunianKu.sql
+  3. Open appsettings.json in Notepad and change the Server= value to match your setup:
+        SQL Server Express   : Server=.\\SQLEXPRESS
+        SQL Server Developer : Server=localhost
+        LocalDB              : Server=(localdb)\\MSSQLLocalDB
+  4. Double-click HunianKu.exe.
+
+Demo accounts:
+  Admin    : admin / admin123
+  Staff    : rina  / staf123
+  Resident : budi  / penghuni123   (agus has overdue bills, siti's contract is about to expire)
