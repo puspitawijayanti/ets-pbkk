@@ -1,0 +1,91 @@
+<UserControl x:Class="HunianKu.Views.Pages.BookingFasilitasPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="340"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+
+        <Border Style="{StaticResource CardBorder}" Margin="0,0,16,12">
+            <DockPanel>
+                <TextBlock x:Name="TxtJudulJadwal" DockPanel.Dock="Top" Text="Jadwal Terisi" Style="{StaticResource SectionTitle}"/>
+                <TextBlock x:Name="TxtJadwalKosong" DockPanel.Dock="Top" Style="{StaticResource MutedText}"
+                           Text="Belum ada booking. Semua jam operasional masih tersedia." Visibility="Collapsed"/>
+                <DataGrid x:Name="DgJadwal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Jam" Binding="{Binding JamTeks}" Width="120"/>
+                        <DataGridTextColumn Header="Unit" Binding="{Binding KodeUnit}" Width="80"/>
+                        <DataGridTextColumn Header="Atas Nama" Binding="{Binding NamaPenghuni}" Width="*" MinWidth="140"/>
+                        <DataGridTextColumn Header="Orang" Binding="{Binding JumlahOrang}" Width="70"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- Booking milik penghuni -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                    <TextBlock Text="Booking Saya" Style="{StaticResource SectionTitle}" Margin="0" VerticalAlignment="Center"/>
+                    <Button x:Name="BtnBatal" Content="Batalkan Booking" Style="{StaticResource DangerButton}"
+                            HorizontalAlignment="Right" Click="Batal_Click" IsEnabled="False"/>
+                </DockPanel>
+                <DataGrid x:Name="DgBookingSaya" SelectionChanged="DgBookingSaya_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fasilitas" Binding="{Binding NamaFasilitas}" Width="140"/>
+                        <DataGridTextColumn Header="Tanggal" Binding="{Binding Tanggal, StringFormat='ddd, dd MMM yyyy'}" Width="140"/>
+                        <DataGridTextColumn Header="Jam" Binding="{Binding JamTeks}" Width="110"/>
+                        <DataGridTextColumn Header="Orang" Binding="{Binding JumlahOrang}" Width="60"/>
+                        <DataGridTextColumn Header="Keperluan" Binding="{Binding Keperluan}" Width="*" MinWidth="140"/>
+                        <DataGridTemplateColumn Header="Status" Width="100" CellTemplate="{StaticResource StatusBadge}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.RowSpan="2" Style="{StaticResource CardBorder}" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="Booking Fasilitas" Style="{StaticResource SectionTitle}"/>
+
+                <TextBlock Text="Fasilitas" Style="{StaticResource FieldLabel}"/>
+                <ComboBox x:Name="CmbFasilitas" DisplayMemberPath="NamaFasilitas" SelectionChanged="Jadwal_Changed"/>
+                <TextBlock x:Name="TxtInfoFasilitas" Style="{StaticResource MutedText}" Margin="0,6,0,0"/>
+
+                <TextBlock Text="Tanggal" Style="{StaticResource FieldLabel}"/>
+                <DatePicker x:Name="DpTanggal" SelectedDateChanged="Jadwal_Changed"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Jam Mulai" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CmbJamMulai"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Jam Selesai" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CmbJamSelesai"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Jumlah Orang" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtJumlahOrang" Text="1" MaxLength="3"/>
+
+                <TextBlock Text="Keperluan (opsional)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtKeperluan" MaxLength="200"/>
+
+                <Button Content="Booking Sekarang" Margin="0,18,0,0" HorizontalAlignment="Left" Click="Booking_Click"/>
+                <TextBlock Style="{StaticResource MutedText}" Margin="0,12,0,0"
+                           Text="Sistem menolak booking yang jamnya bentrok dengan jadwal lain, di luar jam operasional, melebihi durasi maksimal, atau melebihi kapasitas."/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

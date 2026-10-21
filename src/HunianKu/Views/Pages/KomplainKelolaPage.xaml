@@ -1,0 +1,61 @@
+<UserControl x:Class="HunianKu.Views.Pages.KomplainKelolaPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                    <TextBlock Text="Tiket Komplain &amp; Perbaikan" Style="{StaticResource SectionTitle}" Margin="0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="CmbFilter" Width="150" HorizontalAlignment="Right" SelectionChanged="CmbFilter_SelectionChanged"/>
+                </DockPanel>
+                <DataGrid x:Name="DgKomplain" SelectionChanged="DgKomplain_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tiket" Binding="{Binding NomorTiket}" Width="85"/>
+                        <DataGridTextColumn Header="Diajukan" Binding="{Binding TanggalAjukan, StringFormat=dd MMM HH:mm}" Width="95"/>
+                        <DataGridTextColumn Header="Unit" Binding="{Binding KodeUnit}" Width="65"/>
+                        <DataGridTextColumn Header="Judul" Binding="{Binding Judul}" Width="*" MinWidth="140"/>
+                        <DataGridTemplateColumn Header="Prioritas" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Prioritas}" FontWeight="SemiBold"
+                                               Foreground="{Binding Prioritas, Converter={StaticResource StatusWarna}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Status" Width="90" CellTemplate="{StaticResource StatusBadge}"/>
+                        <DataGridTextColumn Header="Teknisi" Binding="{Binding NamaTeknisi, TargetNullValue='-'}" Width="110"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock x:Name="TxtJudulTiket" Text="Penanganan Komplain" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock x:Name="TxtDetail" Text="Pilih tiket di tabel." TextWrapping="Wrap" LineHeight="20"/>
+
+                    <TextBlock Text="Tugaskan Teknisi" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="CmbTeknisi" DisplayMemberPath="Tampilan"/>
+
+                    <TextBlock Text="Status" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox x:Name="CmbStatus"/>
+
+                    <TextBlock Text="Catatan Penanganan (wajib saat Selesai)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox x:Name="TxtCatatan" Height="80" TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalContentAlignment="Top" MaxLength="500"/>
+
+                    <Button x:Name="BtnSimpan" Content="Simpan Penanganan" Margin="0,18,0,0" HorizontalAlignment="Left"
+                            Click="Simpan_Click" IsEnabled="False"/>
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,12,0,0"
+                               Text="Alur status: Diajukan → Diproses → Selesai. Status Diproses dan Selesai membutuhkan teknisi."/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
