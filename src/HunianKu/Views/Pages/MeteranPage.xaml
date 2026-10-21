@@ -1,0 +1,78 @@
+<UserControl x:Class="HunianKu.Views.Pages.MeteranPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="AngkaMeteran" TargetType="TextBlock" BasedOn="{StaticResource AngkaKanan}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SudahDiinput}" Value="False">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="Periode" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox x:Name="CmbBulan" Width="120"/>
+                    <ComboBox x:Name="CmbTahun" Width="80" Margin="6,0,0,0"/>
+                    <Button Content="Tampilkan" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0" Click="Tampilkan_Click"/>
+                    <TextBlock x:Name="TxtProgres" VerticalAlignment="Center" Margin="16,0,0,0" FontWeight="SemiBold"/>
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource MutedText}" Margin="0,10,0,0"
+                           Text="Daftar berisi unit yang memiliki kontrak pada periode tersebut. Pilih baris untuk menginput angka meteran."/>
+                <DataGrid x:Name="DgMeteran" SelectionChanged="DgMeteran_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Unit" Binding="{Binding KodeUnit}" Width="70"/>
+                        <DataGridTextColumn Header="Penghuni" Binding="{Binding NamaPenghuni}" Width="*" MinWidth="140"/>
+                        <DataGridTextColumn Header="Listrik Awal" Binding="{Binding ListrikAwal, StringFormat={}{0:N0}}" Width="95" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTextColumn Header="Listrik Akhir" Binding="{Binding ListrikAkhir, StringFormat={}{0:N0}}" Width="95" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTextColumn Header="kWh" Binding="{Binding PemakaianListrik, StringFormat={}{0:N0}}" Width="60" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTextColumn Header="Air Awal" Binding="{Binding AirAwal, StringFormat={}{0:N0}}" Width="75" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTextColumn Header="Air Akhir" Binding="{Binding AirAkhir, StringFormat={}{0:N0}}" Width="75" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTextColumn Header="m³" Binding="{Binding PemakaianAir, StringFormat={}{0:N0}}" Width="50" ElementStyle="{StaticResource AngkaMeteran}"/>
+                        <DataGridTemplateColumn Header="Status" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding StatusInput, Converter={StaticResource StatusWarna}}"
+                                            CornerRadius="10" Padding="8,2" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding StatusInput}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource CardBorder}" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock x:Name="TxtJudulForm" Text="Input Meteran" Style="{StaticResource SectionTitle}"/>
+                <TextBlock x:Name="TxtInfoForm" Text="Pilih unit di tabel." Style="{StaticResource MutedText}"/>
+
+                <TextBlock Text="Listrik - Angka Awal (kWh)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtListrikAwal"/>
+                <TextBlock Text="Listrik - Angka Akhir (kWh)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtListrikAkhir"/>
+
+                <TextBlock Text="Air - Angka Awal (m³)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtAirAwal"/>
+                <TextBlock Text="Air - Angka Akhir (m³)" Style="{StaticResource FieldLabel}"/>
+                <TextBox x:Name="TxtAirAkhir"/>
+
+                <TextBlock Style="{StaticResource MutedText}" Margin="0,8,0,0"
+                           Text="Angka awal otomatis diambil dari angka akhir bulan sebelumnya. Desimal boleh memakai koma."/>
+
+                <Button x:Name="BtnSimpan" Content="Simpan Meteran" Margin="0,18,0,0" HorizontalAlignment="Left"
+                        Click="Simpan_Click" IsEnabled="False"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
