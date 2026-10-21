@@ -1,0 +1,51 @@
+<Window x:Class="HunianKu.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HunianKu - Login" Height="520" Width="860"
+        WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        Icon="pack://application:,,,/HunianKu;component/Assets/hunianku.ico" Background="{StaticResource Background}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Panel kiri: identitas aplikasi -->
+        <Border Background="{StaticResource Sidebar}">
+            <StackPanel VerticalAlignment="Center" Margin="40,0">
+                <Image Source="pack://application:,,,/HunianKu;component/Assets/hunianku.png" Width="72" Height="72" HorizontalAlignment="Left"/>
+                <TextBlock Text="HunianKu" Foreground="White" FontSize="34" FontWeight="Bold" Margin="0,18,0,4"/>
+                <TextBlock Text="Sistem Manajemen Apartemen" Foreground="#9FB3C8" FontSize="15"/>
+                <TextBlock Foreground="#C9D6E3" FontSize="13" TextWrapping="Wrap" Margin="0,28,0,0" LineHeight="22"
+                           Text="Kelola tower, unit, penghuni, kontrak sewa, tagihan bulanan, pembayaran, komplain, dan booking fasilitas dalam satu aplikasi."/>
+            </StackPanel>
+        </Border>
+
+        <!-- Panel kanan: form login -->
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="70,0">
+            <TextBlock Text="Selamat datang" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Masuk menggunakan akun Anda." Style="{StaticResource MutedText}" Margin="0,4,0,18"/>
+
+            <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
+            <TextBox x:Name="TxtUsername" FontSize="14"/>
+
+            <TextBlock Text="Password" Style="{StaticResource FieldLabel}"/>
+            <PasswordBox x:Name="TxtPassword" FontSize="14"/>
+
+            <TextBlock x:Name="TxtError" Foreground="{StaticResource Danger}" TextWrapping="Wrap"
+                       Margin="0,10,0,0" Visibility="Collapsed"/>
+
+            <Button x:Name="BtnLogin" Content="Masuk" IsDefault="True" Margin="0,18,0,0" Padding="14,10"
+                    Click="Login_Click"/>
+
+            <Border Background="{StaticResource PrimarySoft}" CornerRadius="6" Padding="12" Margin="0,22,0,0">
+                <TextBlock Style="{StaticResource MutedText}" LineHeight="18">
+                    <Run FontWeight="SemiBold" Text="Akun demo"/><LineBreak/>
+                    <Run Text="Admin: admin / admin123"/><LineBreak/>
+                    <Run Text="Staf: rina / staf123"/><LineBreak/>
+                    <Run Text="Penghuni: budi / penghuni123"/>
+                </TextBlock>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
