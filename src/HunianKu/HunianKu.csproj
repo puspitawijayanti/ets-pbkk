@@ -13,8 +13,6 @@
     <Product>HunianKu - Sistem Manajemen Apartemen</Product>
   </PropertyGroup>
 
-  <!-- Pengaturan publish .exe ada di Properties/PublishProfiles/SingleFileExe.pubxml -->
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
   </ItemGroup>
@@ -24,8 +22,6 @@
     <Resource Include="Assets\hunianku.png" />
   </ItemGroup>
 
-  <!-- appsettings.json TIDAK dimasukkan ke dalam .exe, tetapi disalin di
-       sebelahnya supaya connection string bisa diedit dengan Notepad. -->
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
