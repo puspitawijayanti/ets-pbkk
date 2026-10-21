@@ -85,3 +85,15 @@ dotnet publish src/HunianKu/HunianKu.csproj -p:PublishProfile=SingleFileExe
 ```
 
 Hasil build tersedia di `publish/HunianKu/`.
+
+## Dokumentasi
+
+### Link Repository Project
+https://github.com/puspitawijayanti/ets-pbkk
+
+### Link Download Aplikasi
+https://github.com/puspitawijayanti/ets-pbkk/blob/main/release/HunianKu-v1.0.zip
+
+### Link Video Demo Project
+https://youtu.be/gIVeoPRkozk
+
