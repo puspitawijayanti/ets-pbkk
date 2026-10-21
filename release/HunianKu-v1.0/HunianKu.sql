@@ -1,24 +1,3 @@
-/* =====================================================================
-   HunianKu - Sistem Manajemen Apartemen
-   Script lengkap: database, tabel, constraint, index, view, function,
-   stored procedure, dan data dummy.
-
-   Target  : SQL Server 2019+ (diuji di SQL Server 2025 Express)
-   Cara run: buka di SSMS lalu Execute (F5), atau lewat command line:
-             sqlcmd -S .\SQLEXPRESS -E -C -i HunianKu.sql
-
-   PERINGATAN: script ini MENGHAPUS database HunianKu jika sudah ada,
-   lalu membuatnya ulang dari nol (cocok untuk reset data demo).
-
-   Akun demo (username / password):
-     admin  / admin123      -> Admin/Pemilik
-     rina   / staf123       -> Staf Pengelola
-     dodi   / staf123       -> Staf Pengelola
-     budi, siti, andi, ... / penghuni123  -> Penghuni
-   ===================================================================== */
-
--- Wajib ON untuk computed column PERSISTED & filtered index
--- (SSMS sudah ON secara default, sqlcmd tidak).
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
@@ -39,12 +18,6 @@ GO
 USE HunianKu;
 GO
 
-/* =====================================================================
-   1. TABEL MASTER
-   ===================================================================== */
-
--- Akun login semua role. Nama lengkap disimpan di sini (tidak diulang
--- di tabel Penghuni) supaya tidak ada data ganda (3NF).
 CREATE TABLE Users (
     UserId        INT IDENTITY(1,1) NOT NULL,
     Username      VARCHAR(50)    NOT NULL,
@@ -59,7 +32,6 @@ CREATE TABLE Users (
     CONSTRAINT CK_Users_Username CHECK (LEN(Username) >= 3)
 );
 
--- Pengaturan tarif yang bisa diubah Admin tanpa mengubah kode program.
 CREATE TABLE Tarif (
     KodeTarif   VARCHAR(30)    NOT NULL,
     NamaTarif   NVARCHAR(100)  NOT NULL,
@@ -105,12 +77,11 @@ CREATE TABLE Unit (
     CONSTRAINT PK_Unit PRIMARY KEY (UnitId),
     CONSTRAINT FK_Unit_Tower FOREIGN KEY (TowerId) REFERENCES Tower(TowerId),
     CONSTRAINT FK_Unit_TipeUnit FOREIGN KEY (TipeUnitId) REFERENCES TipeUnit(TipeUnitId),
-    CONSTRAINT UQ_Unit_TowerNomor UNIQUE (TowerId, NomorUnit),   -- nomor unik per tower
+    CONSTRAINT UQ_Unit_TowerNomor UNIQUE (TowerId, NomorUnit),  
     CONSTRAINT CK_Unit_Status CHECK (Status IN ('Kosong', 'Terisi', 'Maintenance')),
     CONSTRAINT CK_Unit_Lantai CHECK (Lantai >= 0)
 );
 
--- Data pribadi penghuni. Setiap penghuni wajib punya akun login (1:1 dengan Users).
 CREATE TABLE Penghuni (
     PenghuniId     INT IDENTITY(1,1) NOT NULL,
     UserId         INT            NOT NULL,
@@ -129,7 +100,7 @@ CREATE TABLE Penghuni (
     CONSTRAINT CK_Penghuni_NoHp CHECK (NoHp NOT LIKE '%[^0-9+]%')
 );
 
--- Teknisi yang bisa ditugaskan untuk komplain/perbaikan.
+
 CREATE TABLE Teknisi (
     TeknisiId    INT IDENTITY(1,1) NOT NULL,
     NamaTeknisi  NVARCHAR(100) NOT NULL,
@@ -156,21 +127,17 @@ CREATE TABLE Fasilitas (
 );
 GO
 
-/* =====================================================================
-   2. TABEL TRANSAKSI
-   ===================================================================== */
+
 
 CREATE TABLE Kontrak (
     KontrakId         INT IDENTITY(1,1) NOT NULL,
-    -- Nomor kontrak dibuat otomatis dari ID, contoh: KTR-00012
+
     NomorKontrak      AS ('KTR-' + RIGHT('00000' + CAST(KontrakId AS VARCHAR(10)), 5)) PERSISTED,
     UnitId            INT            NOT NULL,
     PenghuniId        INT            NOT NULL,
     TanggalMulai      DATE           NOT NULL,
     TanggalSelesai    DATE           NOT NULL,
-    -- Harga disalin dari TipeUnit saat kontrak dibuat, karena harga yang
-    -- disepakati di kontrak tidak boleh ikut berubah bila tarif tipe naik.
-    HargaSewaBulanan  DECIMAL(18,2)  NOT NULL,
+
     Deposit           DECIMAL(18,2)  NOT NULL CONSTRAINT DF_Kontrak_Deposit DEFAULT 0,
     Status            VARCHAR(15)    NOT NULL CONSTRAINT DF_Kontrak_Status DEFAULT 'Aktif',
     CreatedAt         DATETIME2(0)   NOT NULL CONSTRAINT DF_Kontrak_CreatedAt DEFAULT SYSDATETIME(),
@@ -182,11 +149,10 @@ CREATE TABLE Kontrak (
     CONSTRAINT CK_Kontrak_Status CHECK (Status IN ('Aktif', 'Selesai', 'Dibatalkan'))
 );
 
--- Catatan meteran listrik (kWh) dan air (m3) per unit per bulan.
 CREATE TABLE Meteran (
     MeteranId     INT IDENTITY(1,1) NOT NULL,
     UnitId        INT            NOT NULL,
-    Periode       DATE           NOT NULL,   -- selalu tanggal 1, contoh 2026-09-01 = September 2026
+    Periode       DATE           NOT NULL,   
     ListrikAwal   DECIMAL(10,2)  NOT NULL,
     ListrikAkhir  DECIMAL(10,2)  NOT NULL,
     AirAwal       DECIMAL(10,2)  NOT NULL,
@@ -196,7 +162,7 @@ CREATE TABLE Meteran (
     CONSTRAINT PK_Meteran PRIMARY KEY (MeteranId),
     CONSTRAINT FK_Meteran_Unit FOREIGN KEY (UnitId) REFERENCES Unit(UnitId),
     CONSTRAINT FK_Meteran_Users FOREIGN KEY (DicatatOleh) REFERENCES Users(UserId),
-    CONSTRAINT UQ_Meteran_UnitPeriode UNIQUE (UnitId, Periode),   -- 1 unit hanya 1 catatan per bulan
+    CONSTRAINT UQ_Meteran_UnitPeriode UNIQUE (UnitId, Periode),   
     CONSTRAINT CK_Meteran_Periode CHECK (DAY(Periode) = 1),
     CONSTRAINT CK_Meteran_Listrik CHECK (ListrikAwal >= 0 AND ListrikAkhir >= ListrikAwal),
     CONSTRAINT CK_Meteran_Air CHECK (AirAwal >= 0 AND AirAkhir >= AirAwal)
@@ -207,11 +173,11 @@ CREATE TABLE Tagihan (
     KontrakId          INT            NOT NULL,
     MeteranId          INT            NOT NULL,
     Periode            DATE           NOT NULL,
-    -- Nomor tagihan otomatis, contoh: INV-202609-0003
+
     NomorTagihan       AS ('INV-' + CONVERT(CHAR(6), Periode, 112) + '-'
                            + RIGHT('0000' + CAST(KontrakId AS VARCHAR(10)), 4)) PERSISTED,
     TanggalJatuhTempo  DATE           NOT NULL,
-    -- Biaya disimpan (snapshot) agar tagihan lama tidak berubah saat tarif diganti.
+
     BiayaSewa          DECIMAL(18,2)  NOT NULL,
     BiayaListrik       DECIMAL(18,2)  NOT NULL,
     BiayaAir           DECIMAL(18,2)  NOT NULL,
@@ -223,7 +189,7 @@ CREATE TABLE Tagihan (
     CONSTRAINT PK_Tagihan PRIMARY KEY (TagihanId),
     CONSTRAINT FK_Tagihan_Kontrak FOREIGN KEY (KontrakId) REFERENCES Kontrak(KontrakId),
     CONSTRAINT FK_Tagihan_Meteran FOREIGN KEY (MeteranId) REFERENCES Meteran(MeteranId),
-    CONSTRAINT UQ_Tagihan_KontrakPeriode UNIQUE (KontrakId, Periode),   -- tidak ada tagihan dobel
+    CONSTRAINT UQ_Tagihan_KontrakPeriode UNIQUE (KontrakId, Periode),   
     CONSTRAINT UQ_Tagihan_Meteran UNIQUE (MeteranId),
     CONSTRAINT CK_Tagihan_Periode CHECK (DAY(Periode) = 1),
     CONSTRAINT CK_Tagihan_Biaya CHECK (BiayaSewa >= 0 AND BiayaListrik >= 0 AND BiayaAir >= 0
@@ -248,7 +214,7 @@ CREATE TABLE Pembayaran (
     CONSTRAINT CK_Pembayaran_Jumlah CHECK (JumlahBayar > 0),
     CONSTRAINT CK_Pembayaran_Metode CHECK (MetodeBayar IN ('Transfer', 'E-Wallet', 'Tunai')),
     CONSTRAINT CK_Pembayaran_Status CHECK (Status IN ('Menunggu', 'Diterima', 'Ditolak')),
-    -- Pembayaran yang sudah diverifikasi wajib mencatat siapa verifikatornya.
+
     CONSTRAINT CK_Pembayaran_Verifikasi CHECK (
         (Status = 'Menunggu' AND DiverifikasiOleh IS NULL)
         OR (Status IN ('Diterima', 'Ditolak') AND DiverifikasiOleh IS NOT NULL AND TanggalVerifikasi IS NOT NULL))
@@ -275,9 +241,9 @@ CREATE TABLE Komplain (
     CONSTRAINT CK_Komplain_Kategori CHECK (Kategori IN ('Listrik', 'Air', 'AC', 'Bangunan', 'Kebersihan', 'Lainnya')),
     CONSTRAINT CK_Komplain_Prioritas CHECK (Prioritas IN ('Rendah', 'Sedang', 'Tinggi')),
     CONSTRAINT CK_Komplain_Status CHECK (Status IN ('Diajukan', 'Diproses', 'Selesai')),
-    -- Komplain hanya bisa diproses/selesai jika sudah ada teknisi.
+
     CONSTRAINT CK_Komplain_Teknisi CHECK (Status = 'Diajukan' OR TeknisiId IS NOT NULL),
-    -- Tanggal selesai terisi jika dan hanya jika status Selesai.
+
     CONSTRAINT CK_Komplain_Selesai CHECK (
         (Status = 'Selesai' AND TanggalSelesai IS NOT NULL)
         OR (Status <> 'Selesai' AND TanggalSelesai IS NULL))
@@ -303,11 +269,6 @@ CREATE TABLE BookingFasilitas (
 );
 GO
 
-/* =====================================================================
-   3. INDEX
-   Index mempercepat pencarian di kolom yang sering dipakai pada WHERE/JOIN.
-   ===================================================================== */
-
 CREATE INDEX IX_Unit_Status        ON Unit(Status);
 CREATE INDEX IX_Unit_TipeUnit      ON Unit(TipeUnitId);
 CREATE INDEX IX_Kontrak_Penghuni   ON Kontrak(PenghuniId);
@@ -321,20 +282,12 @@ CREATE INDEX IX_Komplain_Penghuni  ON Komplain(PenghuniId);
 CREATE INDEX IX_Booking_Jadwal     ON BookingFasilitas(FasilitasId, Tanggal, Status);
 CREATE INDEX IX_Booking_Penghuni   ON BookingFasilitas(PenghuniId);
 
--- Filtered unique index = aturan bisnis yang dijaga database:
--- 1 unit hanya boleh punya 1 kontrak Aktif, dan 1 penghuni hanya 1 kontrak Aktif.
 CREATE UNIQUE INDEX UX_Kontrak_UnitAktif     ON Kontrak(UnitId)     WHERE Status = 'Aktif';
 CREATE UNIQUE INDEX UX_Kontrak_PenghuniAktif ON Kontrak(PenghuniId) WHERE Status = 'Aktif';
 -- 1 tagihan hanya boleh punya 1 pembayaran yang Diterima.
 CREATE UNIQUE INDEX UX_Pembayaran_Diterima   ON Pembayaran(TagihanId) WHERE Status = 'Diterima';
 GO
 
-/* =====================================================================
-   4. FUNCTION
-   ===================================================================== */
-
--- Menghitung denda: (jumlah hari lewat jatuh tempo) x (tarif denda per hari).
--- Contoh: jatuh tempo 10 Okt, dihitung 15 Okt, tarif 10.000 -> 5 x 10.000 = 50.000
 CREATE FUNCTION dbo.fn_HitungDenda (@TanggalJatuhTempo DATE, @TanggalAcuan DATE)
 RETURNS DECIMAL(18,2)
 AS
@@ -350,11 +303,8 @@ BEGIN
 END
 GO
 
-/* =====================================================================
-   5. VIEW
-   ===================================================================== */
 
--- Tagihan lengkap dengan nama penghuni, unit, pemakaian, dan total akhir.
+
 CREATE VIEW dbo.vw_TagihanDetail
 AS
 SELECT
@@ -381,7 +331,7 @@ JOIN Tower    tw ON tw.TowerId   = u.TowerId
 JOIN Meteran  m  ON m.MeteranId  = t.MeteranId;
 GO
 
--- Okupansi per tower: berapa unit terisi dibanding total unit.
+
 CREATE VIEW dbo.vw_OkupansiTower
 AS
 SELECT
@@ -398,7 +348,6 @@ LEFT JOIN Unit u ON u.TowerId = tw.TowerId
 GROUP BY tw.TowerId, tw.KodeTower, tw.NamaTower;
 GO
 
--- Kontrak aktif yang akan berakhir dalam N hari (N diambil dari tabel Tarif).
 CREATE VIEW dbo.vw_KontrakHampirHabis
 AS
 SELECT
@@ -418,14 +367,6 @@ WHERE k.Status = 'Aktif'
         CAST(GETDATE() AS DATE));
 GO
 
-/* =====================================================================
-   6. STORED PROCEDURE
-   ===================================================================== */
-
--- Membuat tagihan bulanan untuk semua kontrak yang berlaku pada @Periode.
--- Tagihan = sewa + (pemakaian listrik x tarif) + (pemakaian air x tarif) + IPL.
--- Kontrak yang meterannya belum diinput dilewati (dilaporkan di hasil).
--- Aman dijalankan berkali-kali: tagihan yang sudah ada tidak dibuat ulang.
 CREATE PROCEDURE dbo.sp_GenerateTagihanBulanan
     @Periode DATE
 AS
@@ -433,7 +374,6 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    -- Normalisasi ke tanggal 1 (mis. 2026-09-17 -> 2026-09-01)
     SET @Periode = DATEFROMPARTS(YEAR(@Periode), MONTH(@Periode), 1);
 
     DECLARE @TarifListrik DECIMAL(18,2) = (SELECT Nilai FROM Tarif WHERE KodeTarif = 'LISTRIK_PER_KWH');
@@ -443,11 +383,9 @@ BEGIN
     IF @TarifListrik IS NULL OR @TarifAir IS NULL OR @TglTempo IS NULL
         THROW 50010, 'Tarif listrik/air/jatuh tempo belum diatur di tabel Tarif.', 1;
 
-    -- Jatuh tempo = tanggal @TglTempo pada bulan berikutnya.
     DECLARE @BulanDepan DATE = DATEADD(MONTH, 1, @Periode);
     DECLARE @JatuhTempo DATE = DATEFROMPARTS(YEAR(@BulanDepan), MONTH(@BulanDepan), @TglTempo);
 
-    -- Kontrak yang berlaku (minimal sebagian) pada bulan @Periode.
     CREATE TABLE #Hasil (
         KontrakId INT, NomorKontrak VARCHAR(20), KodeUnit VARCHAR(20),
         NamaPenghuni NVARCHAR(100), MeteranId INT NULL, Keterangan VARCHAR(30));
@@ -468,8 +406,6 @@ BEGIN
       AND k.TanggalMulai   <= EOMONTH(@Periode)
       AND k.TanggalSelesai >= @Periode;
 
-    -- Satu perintah INSERT...SELECT sudah atomik: semua tagihan masuk, atau
-    -- tidak sama sekali jika ada error (XACT_ABORT ON).
     INSERT INTO Tagihan (KontrakId, MeteranId, Periode, TanggalJatuhTempo,
                          BiayaSewa, BiayaListrik, BiayaAir, BiayaIpl)
     SELECT k.KontrakId, m.MeteranId, @Periode, @JatuhTempo,
@@ -490,9 +426,7 @@ BEGIN
 END
 GO
 
--- Memperbarui denda semua tagihan yang belum dibayar sesuai tanggal hari ini.
--- Dipanggil aplikasi setiap kali daftar tagihan/laporan dibuka.
--- Tagihan "Menunggu Verifikasi"/"Lunas" tidak diubah (dendanya sudah dikunci saat bayar).
+
 CREATE PROCEDURE dbo.sp_HitungDenda
 AS
 BEGIN
@@ -503,12 +437,12 @@ BEGIN
 END
 GO
 
--- Laporan tunggakan: tagihan "Belum Bayar" yang sudah lewat jatuh tempo.
+
 CREATE PROCEDURE dbo.sp_LaporanTunggakan
 AS
 BEGIN
     SET NOCOUNT ON;
-    EXEC dbo.sp_HitungDenda;   -- pastikan denda terbaru
+    EXEC dbo.sp_HitungDenda;   
 
     SELECT NomorTagihan, NamaPenghuni, KodeUnit, Periode, TanggalJatuhTempo,
            HariTerlambat, TotalTagihan, Denda, GrandTotal
@@ -519,7 +453,6 @@ BEGIN
 END
 GO
 
--- Laporan pendapatan per bulan dalam 1 tahun (dari pembayaran yang Diterima).
 CREATE PROCEDURE dbo.sp_LaporanPendapatan
     @Tahun INT
 AS
@@ -549,9 +482,7 @@ BEGIN
 END
 GO
 
--- Booking fasilitas dengan validasi lengkap, termasuk cek jadwal bentrok.
--- Dua jadwal bentrok jika: MulaiBaru < SelesaiLama DAN SelesaiBaru > MulaiLama.
--- UPDLOCK + HOLDLOCK mencegah dua orang mem-booking slot yang sama bersamaan.
+
 CREATE PROCEDURE dbo.sp_BuatBooking
     @FasilitasId INT,
     @PenghuniId  INT,
@@ -563,7 +494,7 @@ CREATE PROCEDURE dbo.sp_BuatBooking
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET XACT_ABORT ON;   -- jika THROW terjadi, transaksi otomatis di-rollback
+    SET XACT_ABORT ON;   
 
     DECLARE @JamBuka TIME(0), @JamTutup TIME(0), @Kapasitas INT, @MaksDurasi INT, @Aktif BIT;
     SELECT @JamBuka = JamBuka, @JamTutup = JamTutup, @Kapasitas = Kapasitas,
@@ -608,19 +539,13 @@ BEGIN
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-        THROW;   -- teruskan pesan error ke aplikasi
+        THROW;  
     END CATCH
 
     SELECT @BookingId AS BookingId;
 END
 GO
 
-/* =====================================================================
-   7. DATA DUMMY
-   Tanggal dibuat relatif terhadap hari ini (GETDATE) supaya demo selalu
-   realistis: ada tagihan 3 bulan terakhir, tunggakan, kontrak hampir
-   habis, komplain berjalan, dan booking mendatang.
-   ===================================================================== */
 
 SET NOCOUNT ON;
 
@@ -661,7 +586,6 @@ INSERT INTO TipeUnit (NamaTipe, LuasM2, JumlahKamar, HargaSewaBulanan, IplPerBul
 (N'2 Bedroom', 54, 2,  7200000, 600000),
 (N'3 Bedroom', 78, 3, 10500000, 850000);
 
--- 24 unit (8 per tower). TipeUnitId: 1=Studio, 2=1BR, 3=2BR, 4=3BR
 INSERT INTO Unit (TowerId, TipeUnitId, NomorUnit, Lantai, Status) VALUES
 (1, 1, '0501',  5, 'Terisi'), (1, 1, '0502',  5, 'Kosong'), (1, 2, '0503',  5, 'Terisi'),
 (1, 2, '0805',  8, 'Kosong'), (1, 3, '0806',  8, 'Terisi'), (1, 3, '1201', 12, 'Terisi'),
@@ -673,7 +597,6 @@ INSERT INTO Unit (TowerId, TipeUnitId, NomorUnit, Lantai, Status) VALUES
 (3, 3, '0602',  6, 'Terisi'), (3, 3, '1001', 10, 'Kosong'), (3, 4, '1002', 10, 'Terisi'),
 (3, 2, '1401', 14, 'Terisi'), (3, 1, '1402', 14, 'Kosong');
 
--- 14 penghuni (UserId 4..17). Penghuni ke-14 (Sarah) belum punya kontrak.
 INSERT INTO Penghuni (UserId, NIK, JenisKelamin, NoHp, Email, Pekerjaan, KontakDarurat) VALUES
 ( 4, '3578010101900001', 'L', '081234500001', 'budi.santoso@mail.com',   N'Karyawan Swasta', N'Sri (Istri) 081234599001'),
 ( 5, '3578014502920002', 'P', '081234500002', 'siti.rahma@mail.com',     N'Dosen',           N'Ahmad (Ayah) 081234599002'),
@@ -702,21 +625,19 @@ INSERT INTO Fasilitas (NamaFasilitas, Lokasi, Kapasitas, JamBuka, JamTutup, Maks
 (N'Ruang Serbaguna', N'Tower C Lantai 1', 80, '08:00', '22:00', 6);
 GO
 
--- ---------- Kontrak, meteran, tagihan, pembayaran (tanggal relatif) ----------
+
 DECLARE @Hari    DATE = CAST(GETDATE() AS DATE);
 DECLARE @BulanIni DATE = DATEFROMPARTS(YEAR(@Hari), MONTH(@Hari), 1);
 
--- Kontrak lama Kevin yang sudah selesai (riwayat), di unit C-1402
 INSERT INTO Kontrak (UnitId, PenghuniId, TanggalMulai, TanggalSelesai, HargaSewaBulanan, Deposit, Status)
 VALUES (24, 13, DATEADD(MONTH, -16, @BulanIni), DATEADD(DAY, -1, DATEADD(MONTH, -4, @BulanIni)), 3500000, 7000000, 'Selesai');
 
--- Kontrak aktif: (PenghuniId, UnitId, TanggalMulai, LamaBulan)
--- Harga sewa diambil dari tipe unit, deposit = 2x sewa.
+
 DECLARE @K TABLE (PenghuniId INT, UnitId INT, Mulai DATE, Selesai DATE);
 INSERT INTO @K VALUES
 ( 1,  1, DATEADD(MONTH, -10, @BulanIni), NULL),
-( 2,  3, DATEADD(DAY, 13, DATEADD(YEAR, -1, @Hari)), DATEADD(DAY, 12, @Hari)),  -- habis 12 hari lagi
-( 3,  5, DATEADD(DAY, 26, DATEADD(YEAR, -1, @Hari)), DATEADD(DAY, 25, @Hari)),  -- habis 25 hari lagi
+( 2,  3, DATEADD(DAY, 13, DATEADD(YEAR, -1, @Hari)), DATEADD(DAY, 12, @Hari)), 
+( 3,  5, DATEADD(DAY, 26, DATEADD(YEAR, -1, @Hari)), DATEADD(DAY, 25, @Hari)),  
 ( 4,  6, DATEADD(MONTH,  -6, @BulanIni), NULL),
 ( 5,  9, DATEADD(MONTH,  -9, @BulanIni), NULL),
 ( 6, 10, DATEADD(MONTH,  -5, @BulanIni), NULL),
@@ -728,7 +649,6 @@ INSERT INTO @K VALUES
 (12, 22, DATEADD(MONTH,  -6, @BulanIni), NULL),
 (13, 23, DATEADD(MONTH,  -3, @BulanIni), NULL);
 
--- Kontrak tanpa tanggal selesai khusus = 1 tahun (kecuali penghuni 5, 8 = 2 tahun)
 UPDATE @K SET Selesai = DATEADD(DAY, -1, DATEADD(MONTH, CASE WHEN PenghuniId IN (5, 8) THEN 24 ELSE 12 END, Mulai))
 WHERE Selesai IS NULL;
 
@@ -739,10 +659,7 @@ JOIN Unit u      ON u.UnitId = k.UnitId
 JOIN TipeUnit tu ON tu.TipeUnitId = u.TipeUnitId
 ORDER BY k.PenghuniId;
 
--- Meteran 3 bulan terakhir untuk semua unit berkontrak aktif.
--- Ke = 1,2,3 -> 3 bulan lalu, 2 bulan lalu, bulan lalu.
--- Pemakaian dibuat bervariasi per unit dengan rumus sederhana agar realistis.
--- Unit 20, 22, 23 sengaja BELUM diinput untuk bulan lalu (bahan demo Staf).
+
 WITH Bulan AS (SELECT Ke FROM (VALUES (1),(2),(3)) v(Ke))
 INSERT INTO Meteran (UnitId, Periode, ListrikAwal, ListrikAkhir, AirAwal, AirAkhir, DicatatOleh, TanggalCatat)
 SELECT k.UnitId,
@@ -759,7 +676,7 @@ WHERE k.Status = 'Aktif'
   AND k.TanggalMulai <= EOMONTH(DATEADD(MONTH, b.Ke - 4, @BulanIni))
   AND NOT (b.Ke = 3 AND k.UnitId IN (20, 22, 23));
 
--- Generate tagihan memakai stored procedure yang sama dengan aplikasi.
+
 DECLARE @P1 DATE = DATEADD(MONTH, -3, @BulanIni),
         @P2 DATE = DATEADD(MONTH, -2, @BulanIni),
         @P3 DATE = DATEADD(MONTH, -1, @BulanIni);
@@ -767,9 +684,7 @@ EXEC dbo.sp_GenerateTagihanBulanan @Periode = @P1;
 EXEC dbo.sp_GenerateTagihanBulanan @Periode = @P2;
 EXEC dbo.sp_GenerateTagihanBulanan @Periode = @P3;
 
--- Status pembayaran:
---  * 3 & 2 bulan lalu : lunas semua, KECUALI Agus (PenghuniId 7) dan Bayu (11, 2 bulan lalu) -> tunggakan
---  * bulan lalu       : penghuni 1-5 lunas, 6 & 8 menunggu verifikasi, sisanya belum bayar
+
 UPDATE t SET Status = 'Lunas'
 FROM Tagihan t JOIN Kontrak k ON k.KontrakId = t.KontrakId
 WHERE (t.Periode IN (@P1, @P2) AND k.PenghuniId <> 7 AND NOT (k.PenghuniId = 11 AND t.Periode = @P2))
@@ -790,7 +705,7 @@ CROSS APPLY (SELECT CASE WHEN DATEADD(DAY, -3, t.TanggalJatuhTempo) > @Hari THEN
                          ELSE DATEADD(DAY, -3, t.TanggalJatuhTempo) END AS Tgl) x
 WHERE t.Status = 'Lunas';
 
--- Menunggu verifikasi (Nadia & Maya membayar kemarin). Denda dikunci saat membayar.
+
 UPDATE t SET Status = 'Menunggu Verifikasi',
              Denda  = dbo.fn_HitungDenda(t.TanggalJatuhTempo, DATEADD(DAY, -1, @Hari))
 FROM Tagihan t JOIN Kontrak k ON k.KontrakId = t.KontrakId
@@ -805,7 +720,7 @@ WHERE t.Status = 'Menunggu Verifikasi';
 
 EXEC dbo.sp_HitungDenda;
 
--- ---------- Komplain ----------
+
 INSERT INTO Komplain (PenghuniId, UnitId, Kategori, Judul, Deskripsi, Prioritas, Status,
                       TeknisiId, TanggalAjukan, TanggalSelesai, CatatanPenanganan) VALUES
 (1, 1, 'Air', N'Keran wastafel bocor', N'Keran wastafel dapur terus menetes walaupun sudah ditutup rapat.',
@@ -821,7 +736,7 @@ INSERT INTO Komplain (PenghuniId, UnitId, Kategori, Judul, Deskripsi, Prioritas,
 (10, 19, 'Bangunan', N'Plafon kamar mandi rembes', N'Ada bercak air di plafon kamar mandi, kemungkinan dari unit atas.',
    'Sedang', 'Diajukan', NULL, SYSDATETIME(), NULL, NULL);
 
--- ---------- Booking fasilitas ----------
+
 INSERT INTO BookingFasilitas (FasilitasId, PenghuniId, Tanggal, JamMulai, JamSelesai, JumlahOrang, Keperluan, Status) VALUES
 (1, 1, DATEADD(DAY, 1, @Hari), '07:00', '09:00',  4, N'Berenang keluarga',    'Aktif'),
 (1, 5, DATEADD(DAY, 1, @Hari), '16:00', '18:00',  2, N'Latihan renang',       'Aktif'),
