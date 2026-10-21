@@ -1,0 +1,22 @@
+<UserControl x:Class="HunianKu.Views.Pages.RiwayatPembayaranPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Style="{StaticResource CardBorder}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Riwayat Pembayaran Saya" Style="{StaticResource SectionTitle}"/>
+            <TextBlock x:Name="TxtRingkasan" DockPanel.Dock="Bottom" Style="{StaticResource MutedText}" Margin="0,10,0,0"/>
+            <DataGrid x:Name="DgRiwayat">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Tgl Bayar" Binding="{Binding TanggalBayar, StringFormat=dd MMM yyyy}" Width="110"/>
+                    <DataGridTextColumn Header="No. Tagihan" Binding="{Binding NomorTagihan}" Width="140"/>
+                    <DataGridTextColumn Header="Periode" Binding="{Binding PeriodeTeks}" Width="140"/>
+                    <DataGridTextColumn Header="Jumlah" Binding="{Binding JumlahBayar, StringFormat='Rp {0:N0}'}" Width="130" ElementStyle="{StaticResource AngkaKanan}"/>
+                    <DataGridTextColumn Header="Metode" Binding="{Binding MetodeBayar}" Width="90"/>
+                    <DataGridTextColumn Header="No. Referensi" Binding="{Binding NomorReferensi}" Width="140"/>
+                    <DataGridTemplateColumn Header="Status" Width="100" CellTemplate="{StaticResource StatusBadge}"/>
+                    <DataGridTextColumn Header="Catatan Staf" Binding="{Binding Catatan}" Width="*" MinWidth="140"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Border>
+</UserControl>

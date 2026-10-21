@@ -1,0 +1,73 @@
+<UserControl x:Class="HunianKu.Views.Pages.TagihanSayaPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="360"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Style="{StaticResource CardBorder}" Margin="0,0,16,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Tagihan Bulanan Saya" Style="{StaticResource SectionTitle}"/>
+                <DataGrid x:Name="DgTagihan" SelectionChanged="DgTagihan_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="No. Tagihan" Binding="{Binding NomorTagihan}" Width="140"/>
+                        <DataGridTextColumn Header="Periode" Binding="{Binding PeriodeTeks}" Width="*" MinWidth="140"/>
+                        <DataGridTextColumn Header="Jatuh Tempo" Binding="{Binding TanggalJatuhTempo, StringFormat=dd MMM yyyy}" Width="110"/>
+                        <DataGridTextColumn Header="Harus Dibayar" Binding="{Binding GrandTotal, StringFormat='Rp {0:N0}'}" Width="130" ElementStyle="{StaticResource AngkaKanan}"/>
+                        <DataGridTemplateColumn Header="Status" Width="150" CellTemplate="{StaticResource StatusBadge}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,6,0">
+                    <TextBlock x:Name="TxtJudulRincian" Text="Rincian Tagihan" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock x:Name="TxtKosong" Text="Pilih tagihan di tabel untuk melihat rincian." Style="{StaticResource MutedText}"/>
+
+                    <Grid x:Name="GridRincian" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="26"/><RowDefinition Height="26"/><RowDefinition Height="26"/>
+                            <RowDefinition Height="26"/><RowDefinition Height="32"/><RowDefinition Height="26"/>
+                            <RowDefinition Height="34"/><RowDefinition Height="26"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Sewa unit"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="TxtSewa"/>
+                        <TextBlock Grid.Row="1" x:Name="LblListrik"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="TxtListrik"/>
+                        <TextBlock Grid.Row="2" x:Name="LblAir"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TxtAir"/>
+                        <TextBlock Grid.Row="3" Text="IPL / service charge"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="TxtIpl"/>
+                        <Border Grid.Row="4" Grid.ColumnSpan="2" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Margin="0,4,0,0"/>
+                        <TextBlock Grid.Row="4" Text="Subtotal" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" x:Name="TxtSubtotal" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="5" x:Name="LblDenda" Foreground="{StaticResource Danger}"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" x:Name="TxtDenda" Foreground="{StaticResource Danger}"/>
+                        <TextBlock Grid.Row="6" Text="Harus dibayar" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" x:Name="TxtGrandTotal" FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="7" Grid.ColumnSpan="2" x:Name="TxtJatuhTempo" Style="{StaticResource MutedText}"/>
+                    </Grid>
+
+                    <StackPanel x:Name="PanelBayar" Visibility="Collapsed" Margin="0,16,0,0">
+                        <TextBlock Text="Bayar Tagihan" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Style="{StaticResource MutedText}"
+                                   Text="Transfer ke BCA 123-456-7890 a.n. PT HunianKu Sejahtera, lalu isi nomor referensi transfer. Staf akan memverifikasi pembayaran Anda."/>
+                        <TextBlock Text="Metode Pembayaran" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox x:Name="CmbMetode"/>
+                        <TextBlock Text="Nomor Referensi / Bukti Transfer" Style="{StaticResource FieldLabel}"/>
+                        <TextBox x:Name="TxtReferensi" MaxLength="50"/>
+                        <Button Content="Kirim Pembayaran" Margin="0,18,0,0" HorizontalAlignment="Left" Click="Bayar_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
