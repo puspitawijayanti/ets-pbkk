@@ -95,7 +95,6 @@ public partial class MainWindow : Window
             Konten.Content = item.BuatHalaman();
             TxtJudulHalaman.Text = item.Judul;
 
-            // Tandai tombol yang aktif (lihat trigger Tag="aktif" di Theme.xaml)
             foreach (Button b in PanelMenu.Children) b.Tag = null;
             tombol.Tag = "aktif";
         }
