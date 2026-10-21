@@ -2,10 +2,6 @@ using System.Globalization;
 
 namespace HunianKu.Helpers;
 
-/// <summary>
-/// Membaca dan memvalidasi isian form. Jika isian salah, melempar
-/// ValidasiException berisi pesan yang langsung bisa ditampilkan ke user.
-/// </summary>
 public static class Input
 {
     public static string Wajib(string? teks, string namaField, int maksPanjang = 200)
@@ -18,7 +14,6 @@ public static class Input
         return t;
     }
 
-    /// <summary>Isian boleh kosong; kosong disimpan sebagai NULL.</summary>
     public static string? Opsional(string? teks, string namaField = "Isian", int maksPanjang = 200)
     {
         if (string.IsNullOrWhiteSpace(teks)) return null;
@@ -28,10 +23,6 @@ public static class Input
         return t;
     }
 
-    /// <summary>
-    /// Angka desimal. Koma atau titik boleh dipakai sebagai pemisah desimal
-    /// (contoh 1250,5 atau 1250.5), tetapi TANPA pemisah ribuan.
-    /// </summary>
     public static decimal Desimal(string? teks, string namaField, decimal min = 0)
     {
         var t = (teks ?? "").Trim().Replace(',', '.');
@@ -51,7 +42,6 @@ public static class Input
         return nilai;
     }
 
-    /// <summary>Memastikan ComboBox/DataGrid sudah dipilih.</summary>
     public static T Pilih<T>(object? terpilih, string namaField) where T : class
         => terpilih as T ?? throw new ValidasiException($"Silakan pilih {namaField} terlebih dahulu.");
 
