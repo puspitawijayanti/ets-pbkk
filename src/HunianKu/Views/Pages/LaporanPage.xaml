@@ -1,0 +1,96 @@
+<UserControl x:Class="HunianKu.Views.Pages.LaporanPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Style="{StaticResource CardBorder}">
+        <TabControl BorderThickness="0" Background="Transparent">
+
+            <TabItem Header="  Okupansi  " Padding="10,6">
+                <DockPanel Margin="0,14,0,0">
+                    <TextBlock x:Name="TxtTotalOkupansi" DockPanel.Dock="Top" Style="{StaticResource SectionTitle}"/>
+                    <DataGrid x:Name="DgOkupansi" RowHeight="40">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Kode" Binding="{Binding KodeTower}" Width="70"/>
+                            <DataGridTextColumn Header="Tower" Binding="{Binding NamaTower}" Width="180"/>
+                            <DataGridTextColumn Header="Total Unit" Binding="{Binding TotalUnit}" Width="90"/>
+                            <DataGridTextColumn Header="Terisi" Binding="{Binding UnitTerisi}" Width="80"/>
+                            <DataGridTextColumn Header="Kosong" Binding="{Binding UnitKosong}" Width="80"/>
+                            <DataGridTextColumn Header="Maintenance" Binding="{Binding UnitMaintenance}" Width="100"/>
+                            <DataGridTemplateColumn Header="Tingkat Okupansi" Width="*" MinWidth="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ProgressBar Value="{Binding PersenOkupansi, Mode=OneWay}" Maximum="100" Height="12"
+                                                         Foreground="{StaticResource Primary}" Background="#E5E7EB" BorderThickness="0"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding PersenOkupansi, StringFormat={}{0:0.#}%}"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="  Pendapatan Bulanan  " Padding="10,6">
+                <DockPanel Margin="0,14,0,0">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="Tahun" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <ComboBox x:Name="CmbTahun" Width="90" SelectionChanged="CmbTahun_SelectionChanged"/>
+                        <TextBlock x:Name="TxtTotalPendapatan" FontWeight="SemiBold" FontSize="15" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource MutedText}" Margin="0,10,0,0"
+                               Text="Pendapatan dihitung dari pembayaran yang sudah DITERIMA staf, dikelompokkan berdasarkan tanggal bayar."/>
+                    <DataGrid x:Name="DgPendapatan">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Bulan" Binding="{Binding NamaBulan}" Width="100"/>
+                            <DataGridTextColumn Header="Transaksi" Binding="{Binding JumlahTransaksi}" Width="80"/>
+                            <DataGridTextColumn Header="Sewa" Binding="{Binding Sewa, StringFormat='Rp {0:N0}'}" Width="125" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Listrik" Binding="{Binding Listrik, StringFormat='Rp {0:N0}'}" Width="110" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Air" Binding="{Binding Air, StringFormat='Rp {0:N0}'}" Width="100" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="IPL" Binding="{Binding Ipl, StringFormat='Rp {0:N0}'}" Width="110" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Denda" Binding="{Binding Denda, StringFormat='Rp {0:N0}'}" Width="95" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalPendapatan, StringFormat='Rp {0:N0}'}" Width="130"
+                                                ElementStyle="{StaticResource AngkaKanan}"/>
+
+                            <DataGridTemplateColumn Header="Grafik" Width="*" MinWidth="140">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ProgressBar Value="{Binding PersenBatang, Mode=OneWay}" Maximum="100" Height="12"
+                                                     Foreground="#16A34A" Background="Transparent" BorderThickness="0"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+
+            <TabItem Header="  Tunggakan  " Padding="10,6">
+                <DockPanel Margin="0,14,0,0">
+                    <TextBlock x:Name="TxtTotalTunggakan" DockPanel.Dock="Top" Style="{StaticResource SectionTitle}" Foreground="{StaticResource Danger}"/>
+                    <TextBlock DockPanel.Dock="Bottom" Style="{StaticResource MutedText}" Margin="0,10,0,0"
+                               Text="Tunggakan = tagihan berstatus Belum Bayar yang sudah melewati tanggal jatuh tempo. Denda sudah diperbarui sesuai tanggal hari ini."/>
+                    <DataGrid x:Name="DgTunggakan">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="No. Tagihan" Binding="{Binding NomorTagihan}" Width="140"/>
+                            <DataGridTextColumn Header="Penghuni" Binding="{Binding NamaPenghuni}" Width="*" MinWidth="140"/>
+                            <DataGridTextColumn Header="Unit" Binding="{Binding KodeUnit}" Width="70"/>
+                            <DataGridTextColumn Header="Periode" Binding="{Binding PeriodeTeks}" Width="130"/>
+                            <DataGridTextColumn Header="Jatuh Tempo" Binding="{Binding TanggalJatuhTempo, StringFormat=dd MMM yyyy}" Width="110"/>
+                            <DataGridTextColumn Header="Terlambat" Binding="{Binding HariTerlambat, StringFormat={}{0} hari}" Width="85"/>
+                            <DataGridTextColumn Header="Tagihan" Binding="{Binding TotalTagihan, StringFormat='Rp {0:N0}'}" Width="120" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Denda" Binding="{Binding Denda, StringFormat='Rp {0:N0}'}" Width="100" ElementStyle="{StaticResource AngkaKanan}"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding GrandTotal, StringFormat='Rp {0:N0}'}" Width="125" ElementStyle="{StaticResource AngkaKanan}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </Border>
+</UserControl>
